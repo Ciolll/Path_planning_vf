@@ -40,7 +40,7 @@ L'architecture respecte le standard Maven :
 ```text
 ├── src/
 │   ├── main/
-│   │   ├── java/com/feron/       # Code source (Logique & UI)
-│   │   └── resources/com/feron/  # Vues FXML, CSS, et Scénarios de test
+│   │   ├── java/com/feron/       # Algorithmes
+│   │   └── resources/com/feron/  # Scénarios de test
 ├── target/                       # Dossier de compilation (généré par Maven)
 └── pom.xml                       # Configuration des dépendances
