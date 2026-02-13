@@ -3,7 +3,7 @@ import com.feron.Visualisation.*;
 import java.util.ArrayList;
 
 public class Particle {
-    public final static int intermedaire_steps=15;
+    public final static int intermedaire_steps=5;
 
     private ArrayList<Double> position=new ArrayList<Double>(2*intermedaire_steps);
     private ArrayList<Double> velocity=new ArrayList<Double>(2*intermedaire_steps);

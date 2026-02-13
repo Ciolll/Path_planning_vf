@@ -13,13 +13,51 @@ public class Algorithm {
     public static double alpha=0.25;
 
     public static double beta=0.99;
-    public static double T0=500;
+    public static double T0=100;
+
+    public static double noise_amplitude=300;
 
     public static int max_iter=10000;
     public static int max_iter_wo_imp=20;
 
     public static int max_iter_local=50;
-    
+
+
+    //Initialisation intelligente
+    public static ArrayList<Particle> init_heuristic(Environnement env,double x_s,double y_s,double x_e,double y_e){
+        ArrayList<Particle> particles=new ArrayList<Particle>(S);
+        for (int i=0;i<S;++i){
+            Particle curr=new Particle (x_s,y_s,x_e,y_e);
+            ArrayList<Double> velo=new ArrayList<Double>(2*Particle.intermedaire_steps);
+            for (int k=0;k<2*Particle.intermedaire_steps;++k){
+                velo.add(0.0);
+            }
+            curr.set_velocity(velo);
+            for (int k = 0; k < Particle.intermedaire_steps; k++) {
+                
+                double t = (double) (k + 1) / (Particle.intermedaire_steps + 1);
+
+                double ideal_x = x_s + t * (x_e - x_s);
+                double ideal_y = y_s + t * (y_e - y_s);
+
+                double noise_x = (Math.random() - 0.5) * 2 * noise_amplitude;
+                double noise_y = (Math.random() - 0.5) * 2 * noise_amplitude;
+
+                double final_x = ideal_x + noise_x;
+                double final_y = ideal_y + noise_y;
+
+                final_x = Math.max(0, Math.min(env.get_width(), final_x));
+                final_y = Math.max(0, Math.min(env.get_height(), final_y));
+
+                curr.get_position().add(final_x);
+                curr.get_position().add(final_y);
+                }
+            particles.add(curr);
+        }
+        return particles;
+    }
+
+
     public static ArrayList<Particle> init_config(Environnement env,double x_s,double y_s,double x_e,double y_e){
         ArrayList<Particle> particles=new ArrayList<Particle>(S);
         for (int i=0;i<S;++i){
@@ -42,7 +80,7 @@ public class Algorithm {
 
 
     public static MyPath basic_pso(Environnement env,double x_s,double y_s,double x_e,double y_e){
-        ArrayList<Particle> particles=init_config(env, x_s, y_s, x_e, y_e);
+        ArrayList<Particle> particles=init_heuristic(env, x_s, y_s, x_e, y_e);
         double[] iter_last_up=new double[S];
         ArrayList<Particle> best_local_particles=new ArrayList<Particle>();
         ArrayList<Double> best_local_part_len=new ArrayList<Double>(particles.size());
@@ -101,6 +139,7 @@ public class Algorithm {
                 new_particle.set_velocity(new_velocity);
                 double new_len=FitnessFunction.fitness_function(new_particle,env);
                 
+                // HEURISTIQUE QUESTION 10
                 double T=T0*Math.pow(beta,nb_iteration);
                 if (T>0.000){
                     double p=Math.min(1,Math.exp(-(new_len-min_length)/T));
@@ -120,6 +159,7 @@ public class Algorithm {
                 }else {
                     iter_last_up[i]++;
                 }
+                //HEURISTIQUE QUESTION 11 PAS OUF
                 // if (iter_last_up[i]>max_iter_local){
                 //     ArrayList<Double> pi = new ArrayList<>(best_local_particles.get(i).get_position());
                 //     double currentBestlen = best_local_part_len.get(i);
@@ -159,7 +199,12 @@ public class Algorithm {
             }else{
                 nb_iter_wo_imp++;
             }
-
+            /*
+            if (nb_iter_wo_imp>max_iter_wo_imp){
+                break;
+            }
+                */
+            //HEURISTIQUE QUESTION 9
             if (nb_iter_wo_imp>max_iter_wo_imp){
                 System.out.println("Stagnation détectée à l'itération " + nb_iteration + ". Restart partiel...");
         
@@ -182,7 +227,7 @@ public class Algorithm {
                 }
                 nb_iter_wo_imp=0;
             }
-            
+
         }
         System.out.println("l'algorithme a effectué "+nb_iteration+" étapes");
         System.out.println("La longueur du chemin calculé est "+min_length);

@@ -13,6 +13,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.scene.shape.*;
 
+import javafx.scene.image.WritableImage;
+import javafx.embed.swing.SwingFXUtils;
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+import javafx.scene.SnapshotParameters;
+
 import com.feron.PSO.*;
 import com.feron.RRT.*;
 
@@ -20,7 +27,7 @@ public class Workplace extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-        Environnement testEnvironnement= EnvironnementLoader.load_test("scenario2.txt");
+        Environnement testEnvironnement= EnvironnementLoader.load_test("scenario3.txt");
         double scale =0.5;
         // Obstacle testObstacle=new Obstacle(0, 450, 20,50);
         // testEnvironnement.add_obstacle(testObstacle);
@@ -44,7 +51,7 @@ public class Workplace extends Application {
 
         ThreadMXBean bean = ManagementFactory.getThreadMXBean();
         long startCpuTime = bean.getCurrentThreadCpuTime();
-        MyPath path=RrtAlgorithm.rrt(testEnvironnement,x_s,y_s,x_e,y_e);
+        MyPath path=Algorithm.basic_pso(testEnvironnement,x_s,y_s,x_e,y_e); // changer en fonction de l'algo utilisé soit Algorithm.basic_pso soit RRt.rrt
         long endCpuTime = bean.getCurrentThreadCpuTime();
         double cpuTimeMs = (endCpuTime - startCpuTime) / 1_000_000.0;
         System.out.println("Temps CPU effectif : " + cpuTimeMs + " ms");
@@ -72,12 +79,20 @@ public class Workplace extends Application {
             }
             canvas.getChildren().add(viewRob);
         }
+
+        
+        String filename = "resultat_" + System.currentTimeMillis() + ".png";
+        canvas.layout(); 
+        save_canvas(canvas, filename);
+        
+
         Scene scene = new Scene(canvas);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Simulation Robotique");
         primaryStage.show();
         }catch (Exception e){
             System.err.println("le fichier n'a pas pu être ouvert");
+            e.printStackTrace();
         }
     
     }
@@ -114,6 +129,20 @@ public class Workplace extends Application {
             canvas.getChildren().add(l);
         }
     }
+
+    public void save_canvas(Pane canvas, String filename) {
+    WritableImage image = new WritableImage((int)canvas.getPrefWidth(), (int)canvas.getPrefHeight());
+    
+    canvas.snapshot(new SnapshotParameters(), image);
+    
+    File file = new File(filename);
+    try {
+        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+        System.out.println("Environnement sauvegardé sous : " + file.getAbsolutePath());
+    } catch (IOException e) {
+        System.err.println("Erreur lors de la sauvegarde de l'image : " + e.getMessage());
+    }
+}
 
     public static void main(String[] args) {
         launch(args);

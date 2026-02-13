@@ -2,6 +2,7 @@ module com.feron{
     requires javafx.controls;
     requires javafx.fxml;
     requires java.management;
+    requires javafx.swing;
 
     opens com.feron to javafx.fxml;
     

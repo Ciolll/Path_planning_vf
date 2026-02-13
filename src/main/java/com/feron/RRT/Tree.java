@@ -6,6 +6,8 @@ import java.util.List;
 import com.feron.Visualisation.MyPath;
 import com.feron.Visualisation.Point;
 
+
+
 public class Tree {
     private Node node;
     private Tree left;
@@ -35,6 +37,9 @@ public class Tree {
     public void set_right(Tree t){
         this.right=t;
     }
+
+    // Insertion intelligent pour que la recherche de voisins à une distance donnée et de plus proche voisin soit facile.
+    // Pour chaque noeud on partitionne en deux notre environnement selon l'abscisse/l'ordonnée du noeud.
 
     public void insert (Node n,Tree current, int depth){
         if (current == null || n == null) return;
@@ -69,6 +74,9 @@ public class Tree {
         }
     }
 
+    //recherche le noeud de l'arbre le plus proche du point p, on utilise la profondeur 
+    // pour savoir si on est sur une étape de partition horizontale ou verticale.
+
     private Node findNearest_rec(Point p, int depth,Tree current,Node best){
         if (current == null) return best;
         double current_dist=p.dist_sq(current.get_node().get_point());
@@ -83,12 +91,12 @@ public class Tree {
         double diff= dim==0 ? p.get_x()-current.get_node().get_point().get_x():
                               p.get_y()-current.get_node().get_point().get_y();
         
-        Tree nearChild = (diff < 0) ? current.get_left() : current.get_right();
-        Tree farChild = (diff < 0) ? current.get_right() : current.get_left();
+        Tree nearChild = (diff < 0) ? current.get_left() : current.get_right(); // Si disons dim==0 et diff<0, le côté privilégié est l'arbre de gauche 
+        Tree farChild = (diff < 0) ? current.get_right() : current.get_left(); //  car p est à gauche de la racine
         
-        best=findNearest_rec(p, depth+1, nearChild, best);
-        if (diff*diff<p.dist_sq(best.get_point())){
-            best=findNearest_rec(p, depth+1, farChild, best);
+        best=findNearest_rec(p, depth+1, nearChild, best); // on cherche le plus proche voisin de p parmis les noeuds du meme coté que lui
+        if (diff*diff<p.dist_sq(best.get_point())){      // si la distance de p à l'hyperplan de séparation est inférieur à la meilleure distance, 
+            best=findNearest_rec(p, depth+1, farChild, best); //  le plus proche voisin pourrait etre dans l'arbre de droite.
         }
         return best;
     }
@@ -101,6 +109,7 @@ public class Tree {
         }
     }
 
+    // On effectue le même raisonnement que précédemment, notamment avec le controle de la distance à l'hyperplan.
     private List<Node> neighbours_rec(Point p, double radius,Tree current, List<Node> neighbours,int depth){
         if (current == null || current.node == null) {
             return neighbours;
@@ -146,7 +155,7 @@ public class Tree {
             while (current!=null){
                 path.get_points().add(current.get_point().get_y());
                 path.get_points().add(current.get_point().get_x());
-                current=current.get_parent();
+                current=current.get_parent();   // le parent dans l'arbre n'est pas le parent dans le chemin !
             }
             return path;
         }

@@ -36,6 +36,7 @@ public class MyPath {
         }
     }
 
+    //Amélioration proposé dans la partie RRT, d'inégalité triangulaire.
     public MyPath tr_in_improve(Environnement env){
         int n=this.points.size();
         if (n<6){
