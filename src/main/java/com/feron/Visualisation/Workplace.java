@@ -1,6 +1,7 @@
 package com.feron.Visualisation;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
@@ -22,18 +23,15 @@ import javafx.scene.SnapshotParameters;
 
 import com.feron.PSO.*;
 import com.feron.RRT.*;
+import com.feron.TWOROBOTS.JointRrtAlgorithm;
 
 public class Workplace extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-        Environnement testEnvironnement= EnvironnementLoader.load_test("scenario3.txt");
+        Environnement testEnvironnement= EnvironnementLoader.load_test("scenario4.txt"); // changer le numéro du fichier par le scenario souhaité
+       
         double scale =0.5;
-        // Obstacle testObstacle=new Obstacle(0, 450, 20,50);
-        // testEnvironnement.add_obstacle(testObstacle);
-        // Robot testRobot=new Robot(2,2);
-        // testRobot.set_R(-10);
-        // testEnvironnement.add_robot(testRobot);
         
         Pane canvas = new Pane();
         canvas.setStyle("-fx-background-color: white;");
@@ -51,21 +49,49 @@ public class Workplace extends Application {
 
         ThreadMXBean bean = ManagementFactory.getThreadMXBean();
         long startCpuTime = bean.getCurrentThreadCpuTime();
-        MyPath path=Algorithm.basic_pso(testEnvironnement,x_s,y_s,x_e,y_e); // changer en fonction de l'algo utilisé soit Algorithm.basic_pso soit RRt.rrt
+        
+        MyPath path=PSOAlgorithm.basic_pso(testEnvironnement,x_s,y_s,x_e,y_e); // changer en fonction de l'algo utilisé soit PSOAlgorithm.basic_pso soit RRt.rrt
+        
         long endCpuTime = bean.getCurrentThreadCpuTime();
         double cpuTimeMs = (endCpuTime - startCpuTime) / 1_000_000.0;
         System.out.println("Temps CPU effectif : " + cpuTimeMs + " ms");
 
-        view_path(canvas, testEnvironnement, path, scale);
+        view_path(canvas, testEnvironnement, path, scale,Color.RED);
 
+        //A DECOMMENTER SI ON VEUT UTILISER LES DEUX ROBOTS 
+        // ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+        // long startCpuTime = bean.getCurrentThreadCpuTime();
+        
+        // List<MyPath> paths = JointRrtAlgorithm.rrtJoint(testEnvironnement); 
+        
+        // long endCpuTime = bean.getCurrentThreadCpuTime();
+        // double cpuTimeMs = (endCpuTime - startCpuTime) / 1_000_000.0;
+        // System.out.println("Temps CPU effectif : " + cpuTimeMs + " ms");
+
+        // if (paths != null && paths.size() == 2) {
+        //     MyPath pathR1 = paths.get(0);
+        //     MyPath pathR2 = paths.get(1);
+            
+        //     if (!pathR1.get_points().isEmpty()) {
+        //         view_path(canvas, testEnvironnement, pathR1, scale, Color.BLUE);
+        //     }
+        //     if (!pathR2.get_points().isEmpty()) {
+        //         view_path(canvas, testEnvironnement, pathR2, scale, Color.GREEN);
+        //     }
+        // } else {
+        //     System.out.println("Aucun chemin valide n'a pu être tracé.");
+        // }
+
+
+    //visualisation des obstacles
         for (Obstacle obs:testEnvironnement.get_obstacles()){
             Point p_obs=mod_coord(obs.get_x(), obs.get_y(), testEnvironnement);
             Rectangle viewObs= new Rectangle (p_obs.get_x()*scale,scale*(p_obs.get_y()-obs.get_height()),scale*obs.get_width(),scale*obs.get_height());
             viewObs.setFill(Color.BLACK);
             canvas.getChildren().add(viewObs);
-            // System.out.println(p_obs.get_x());
-            // System.out.println(p_obs.get_y());
         }
+
+        //visualisation des robots
         for (Robot r:testEnvironnement.get_robots()){
             double R_current=r.get_R();
             Point p_rob=mod_coord(r.get_x_center(), r.get_y_center(), testEnvironnement);
@@ -80,10 +106,10 @@ public class Workplace extends Application {
             canvas.getChildren().add(viewRob);
         }
 
-        
-        String filename = "resultat_" + System.currentTimeMillis() + ".png";
-        canvas.layout(); 
-        save_canvas(canvas, filename);
+        //A DECOMMENTER SI ON VEUT ENREGISTRER L'IMAGE
+        // String filename = "resultat_" + System.currentTimeMillis() + ".png";
+        // canvas.layout(); 
+        // save_canvas(canvas, filename);
         
 
         Scene scene = new Scene(canvas);
@@ -97,6 +123,11 @@ public class Workplace extends Application {
     
     }
 
+
+
+
+
+
     public Point mod_coord(double x,double y,Environnement env){
         double xmax=env.get_width();
         double ymax=env.get_height();
@@ -109,7 +140,7 @@ public class Workplace extends Application {
         return p;
     }
 
-    public void view_path(Pane canvas, Environnement env, MyPath path,double scale){
+    public void view_path(Pane canvas, Environnement env, MyPath path,double scale, Color color){
         ArrayList<Double> points =path.get_points();
         if (points==null){
             return;
@@ -125,24 +156,24 @@ public class Workplace extends Application {
             Point p_b=mod_coord(x_b,y_b,env);
 
             Line l=new Line(p_a.get_x()*scale,p_a.get_y()*scale,p_b.get_x()*scale,p_b.get_y()*scale);
-            l.setStroke(Color.RED);
+            l.setStroke(color);
             canvas.getChildren().add(l);
         }
     }
 
     public void save_canvas(Pane canvas, String filename) {
-    WritableImage image = new WritableImage((int)canvas.getPrefWidth(), (int)canvas.getPrefHeight());
-    
-    canvas.snapshot(new SnapshotParameters(), image);
-    
-    File file = new File(filename);
-    try {
-        ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-        System.out.println("Environnement sauvegardé sous : " + file.getAbsolutePath());
-    } catch (IOException e) {
-        System.err.println("Erreur lors de la sauvegarde de l'image : " + e.getMessage());
+        WritableImage image = new WritableImage((int)canvas.getPrefWidth(), (int)canvas.getPrefHeight());
+        
+        canvas.snapshot(new SnapshotParameters(), image);
+        
+        File file = new File(filename);
+        try {
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            System.out.println("Environnement sauvegardé sous : " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Erreur lors de la sauvegarde de l'image : " + e.getMessage());
+        }
     }
-}
 
     public static void main(String[] args) {
         launch(args);

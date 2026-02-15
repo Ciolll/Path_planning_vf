@@ -18,7 +18,7 @@ public class Algorithm {
     public static double noise_amplitude=300;
 
     public static int max_iter=10000;
-    public static int max_iter_wo_imp=20;
+    public static int max_iter_wo_imp=150;
 
     public static int max_iter_local=50;
 
@@ -81,13 +81,16 @@ public class Algorithm {
 
     public static MyPath basic_pso(Environnement env,double x_s,double y_s,double x_e,double y_e){
         ArrayList<Particle> particles=init_heuristic(env, x_s, y_s, x_e, y_e);
+        
         double[] iter_last_up=new double[S];
+        
         ArrayList<Particle> best_local_particles=new ArrayList<Particle>();
         ArrayList<Double> best_local_part_len=new ArrayList<Double>(particles.size());
+        
         int ind_best=0;
         double min_length=Double.POSITIVE_INFINITY;
 
-        for (int i=0;i<S;++i){
+        for (int i=0;i<S;++i){      // Initialisation d'un tableau contenant à chaque instant la meilleure itération de chaque particule.
             double part_l= FitnessFunction.fitness_function(particles.get(i),env);
             best_local_part_len.add(part_l);
 
@@ -105,6 +108,7 @@ public class Algorithm {
 
         int nb_iteration=0;
         int nb_iter_wo_imp=0;
+        
         double vmax=Math.min(env.get_height(),env.get_width())*alpha;
         
 
@@ -112,14 +116,17 @@ public class Algorithm {
             double current_min_l=min_length;
             for (int i=0;i<S;++i){
                 Particle best_local_particle=best_local_particles.get(i);
+                
                 Particle current_part=particles.get(i);
                 ArrayList<Double> new_position=new ArrayList<Double>();
                 ArrayList<Double> new_velocity=new ArrayList<Double>();
+                
                 Particle new_particle=new Particle(current_part.get_x_s(),current_part.get_y_s(),current_part.get_x_e(),current_part.get_y_e());
                 
                 for (int j=0;j<2*Particle.intermedaire_steps;++j){
                     double r1=Math.random();
                     double r2=Math.random();
+                    
                     double v_i_j=w*current_part.get_velocity().get(j)+
                     c1*r1*(best_local_particle.get_position().get(j)-current_part.get_position().get(j))+
                     c2*r2*(best_particle.get_position().get(j)-current_part.get_position().get(j));
@@ -127,6 +134,7 @@ public class Algorithm {
                     v_i_j = Math.max(-vmax, Math.min(vmax, v_i_j));
                     new_velocity.add(v_i_j);
                     double updated_pos = v_i_j + current_part.get_position().get(j);
+                    
                     if (j % 2 == 0) { 
                         updated_pos = Math.max(0, Math.min(env.get_width(), updated_pos));
                     } else { 
@@ -137,6 +145,7 @@ public class Algorithm {
 
                 new_particle.set_position(new_position);
                 new_particle.set_velocity(new_velocity);
+                
                 double new_len=FitnessFunction.fitness_function(new_particle,env);
                 
                 // HEURISTIQUE QUESTION 10
@@ -147,7 +156,7 @@ public class Algorithm {
                     if (r<p){
                         best_particle=new_particle;
                         min_length=new_len;
-                        System.out.println("changement de best solution");
+                        //System.out.println("changement de best solution");
                     }
                 }
 
@@ -159,7 +168,9 @@ public class Algorithm {
                 }else {
                     iter_last_up[i]++;
                 }
-                //HEURISTIQUE QUESTION 11 PAS OUF
+                //FIN DE l'HEURISTIQUE
+
+                //HEURISTIQUE QUESTION 11 
                 // if (iter_last_up[i]>max_iter_local){
                 //     ArrayList<Double> pi = new ArrayList<>(best_local_particles.get(i).get_position());
                 //     double currentBestlen = best_local_part_len.get(i);
@@ -181,7 +192,7 @@ public class Algorithm {
                 //             pi.set(j, originalValue);
                 //         }
                 //     }
-                // }
+                // } //Fin de l'heuristique
 
 
                 if(new_len<min_length){
@@ -199,14 +210,15 @@ public class Algorithm {
             }else{
                 nb_iter_wo_imp++;
             }
+            // Le bloc suivant est à décommenter si l'on ne veut pas utiliser d'heuristique du tout.
             /*
             if (nb_iter_wo_imp>max_iter_wo_imp){
-                break;
+                break;                              
             }
                 */
             //HEURISTIQUE QUESTION 9
             if (nb_iter_wo_imp>max_iter_wo_imp){
-                System.out.println("Stagnation détectée à l'itération " + nb_iteration + ". Restart partiel...");
+                //System.out.println("Stagnation détectée à l'itération " + nb_iteration + ". Restart partiel...");
         
                 for (int i = S/2; i < S; i++) {
                     Particle curr=new Particle (x_s,y_s,x_e,y_e);
@@ -226,7 +238,7 @@ public class Algorithm {
                     best_local_part_len.set(i, Double.POSITIVE_INFINITY);
                 }
                 nb_iter_wo_imp=0;
-            }
+            } //FIN DE L'HEURISTIQUE
 
         }
         System.out.println("l'algorithme a effectué "+nb_iteration+" étapes");

@@ -53,6 +53,8 @@ public class Environnement {
         return this.obstacles.get(i);
     }
 
+
+    
     public boolean isPointFree(Point p){
         for (Obstacle o:this.obstacles){
             double obs_x_min = o.get_x();
@@ -69,6 +71,8 @@ public class Environnement {
         }
         return true;
     }
+
+    
     public boolean isColisionFree(Point a,Point b){
         for (Obstacle o:this.obstacles){
             double obs_x_min = o.get_x();

@@ -45,6 +45,7 @@ public class RrtAlgorithm {
         int nb_iter=0;
         Node bestGoalNode=null;
         Point end=new Point(x_e,y_e);
+        
         while (nb_iter<nb_iter_max){
             Point v_r;
             //v_r = getIntelligentSample(env,x_e,y_e); //Optimisation avec le sampling intelligent.
@@ -89,7 +90,7 @@ public class RrtAlgorithm {
                     double currentTotalCost = v.get_dist() + Math.sqrt(v.get_point().dist_sq(end));
                     if (bestGoalNode == null || currentTotalCost < (bestGoalNode.get_dist() + Math.sqrt(bestGoalNode.get_point().dist_sq(end)))) {
                         bestGoalNode = v;
-                        System.out.println("best goal updated");
+                        // System.out.println("best goal updated");
                     } 
             }
             }
@@ -109,7 +110,7 @@ public class RrtAlgorithm {
             path.get_points().add(y_e);
             System.out.println("le chemin a une longueur initiale avant optimisation de "+path.path_length());
             //path.tr_in_improve(env); // voir la classe MyPath pour la méthode en détail.
-            System.out.println("le chemin a une longueur initiale après optimisation de "+path.path_length());
+            System.out.println("le chemin a une longueur après optimisation de "+path.path_length());
             return path;
 
         }
