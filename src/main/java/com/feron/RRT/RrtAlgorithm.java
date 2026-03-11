@@ -48,7 +48,7 @@ public class RrtAlgorithm {
         
         while (nb_iter<nb_iter_max){
             Point v_r;
-            //v_r = getIntelligentSample(env,x_e,y_e); //Optimisation avec le sampling intelligent.
+            //v_r = getIntelligentSample(env,x_e,y_e); //Optimisation avec le sampling intelligent, choisir une des deux lignes à commenter.
             v_r=init_rand_point(env);
                     
             Node v_n=tree.findNearest(v_r);
@@ -109,7 +109,7 @@ public class RrtAlgorithm {
             path.get_points().add(x_e);
             path.get_points().add(y_e);
             System.out.println("le chemin a une longueur initiale avant optimisation de "+path.path_length());
-            //path.tr_in_improve(env); // voir la classe MyPath pour la méthode en détail.
+            //path.tr_in_improve(env); // voir la classe MyPath pour la méthode en détail, à décommenter si on veut utiliser cette heuristique.
             System.out.println("le chemin a une longueur après optimisation de "+path.path_length());
             return path;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.feron.Visualisation.*;
 
-public class Algorithm {
+public class PSOAlgorithm {
     public static int S=200;
     public static double w=0.9;
     public static double c1=1.8;

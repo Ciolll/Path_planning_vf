@@ -6,10 +6,10 @@ import java.util.List;
 import com.feron.Visualisation.Point;
 
 public class Node {
-    private Node parent;
+    private Node parent;  // Le parent n'est pas le parent dans l'arbre mais le sommet précédent dans le chemin.
     private Point point;
     private double dist;
-    private List<Node> children;
+    private List<Node> children; // de même pour les enfants. on les stocke pour mettre à jour les distances.
 
     public Node (double x,double y){
         this.point=new Point(x,y);
@@ -53,6 +53,8 @@ public class Node {
     public void remove_child(Node n){
         this.children.remove(n);
     }
+
+    // Cette fonction permet de modifier la distance des enfants lorsque la distance du noeud est modifé.
     public void propagatecost(){
         for (Node child:this.children){
             child.dist=this.dist+this.get_point().dist_sq(child.get_point());
